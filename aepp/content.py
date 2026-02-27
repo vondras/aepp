@@ -47,7 +47,7 @@ class Content(_AJOBase):
             config=config, header=header, loggingObject=loggingObject, **kwargs
         )
         self.endpoint = (
-            self.connector.config.get("global", aepp.config.endpoints["global"])
+            aepp.config.endpoints["global"]
             + aepp.config.endpoints["ajo_content"]
         )
 

@@ -81,7 +81,7 @@ class _AJOBase:
             config=config,
             header=header,
             loggingEnabled=self.loggingEnabled,
-            loggingObject=self.logger,
+            logger=self.logger,
         )
         self.header = self.connector.header
         self.header.update(**kwargs)
