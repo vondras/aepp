@@ -57,7 +57,23 @@ and the corresponding `aepp` Python wrapper modules.
 - **Tags:** Content template API, Content fragment API
 - **Operations:** 14
 - **Prod server:** `https://platform.adobe.io/ajo/content`
-- **Key paths:** `GET, POST /templates`, `GET, PUT, DELETE /templates/{id}`, `GET, POST /fragments`, `GET, PUT, DELETE /fragments/{id}`
+- **Key paths:** `GET, POST /templates`, `GET, PUT, PATCH, DELETE /templates/{id}`, `GET, POST /fragments`, `GET, PUT, PATCH, DELETE /fragments/{id}`, `POST /fragments/publications`, `GET /fragments/{id}/live`, `GET /fragments/{id}/publications/latest`
+- **aepp module:** `aepp.content.Content`
+- **Implemented methods:**
+  - `createTemplate(data)` — `POST /templates`
+  - `listTemplates(limit, start, orderBy, property)` — `GET /templates`
+  - `getTemplate(templateId)` — `GET /templates/{id}`
+  - `putTemplate(templateId, data, if_match)` — `PUT /templates/{id}`
+  - `patchTemplate(templateId, operations, if_match)` — `PATCH /templates/{id}`
+  - `deleteTemplate(templateId)` — `DELETE /templates/{id}`
+  - `createFragment(data)` — `POST /fragments`
+  - `listFragments(limit, start, orderBy, property)` — `GET /fragments`
+  - `getFragment(fragmentId)` — `GET /fragments/{id}`
+  - `putFragment(fragmentId, data, if_match)` — `PUT /fragments/{id}`
+  - `patchFragment(fragmentId, operations, if_match)` — `PATCH /fragments/{id}`
+  - `publishFragment(data)` — `POST /fragments/publications`
+  - `getLiveFragment(fragmentId)` — `GET /fragments/{id}/live`
+  - `getLastPublicationStatus(fragmentId)` — `GET /fragments/{id}/publications/latest`
 
 ### `journey-retrieve.yaml`
 - **Title:** Retrieve Journeys using APIs
@@ -66,7 +82,11 @@ and the corresponding `aepp` Python wrapper modules.
 - **Tags:** Journeys
 - **Operations:** 2
 - **Prod server:** `https://platform.adobe.io/ajo/journey`
-- **Key paths:** `GET /ajo/journey`, `GET /ajo/journey/{id}`
+- **Key paths:** `GET /journeys`, `GET /journeys/{journeyId}`
+- **aepp module:** `aepp.journey.Journey`
+- **Implemented methods:**
+  - `getJourneys(filter, page, pageSize, fields, sort)` — `GET /journeys`
+  - `getJourney(journeyId, include)` — `GET /journeys/{journeyId}`
 
 ### `journeys-throttling.yaml`
 - **Title:** Journeys throttling configurations APIs
@@ -76,6 +96,24 @@ and the corresponding `aepp` Python wrapper modules.
 - **Operations:** 16
 - **Prod server:** `https://platform.adobe.io/journey/orchestration`
 - **Key paths:** `POST /endpointConfigs`, `GET, PUT, DELETE /endpointConfigs/{uid}`, `GET /endpointConfigs/{uid}/canDeploy`, `POST /endpointConfigs/{uid}/deploy`, `POST /endpointConfigs/{uid}/undeploy`, `POST /list/endpointConfigs`, `POST /throttlingConfigs`, `GET, PUT, DELETE /throttlingConfigs/{uid}`, `GET /throttlingConfigs/{uid}/canDeploy`, `POST /throttlingConfigs/{uid}/deploy`, `POST /throttlingConfigs/{uid}/undeploy`, `POST /list/throttlingConfigs`
+- **aepp module:** `aepp.orchestration.Orchestration`
+- **Implemented methods:**
+  - `createEndpointConfig(data)` — `POST /endpointConfigs`
+  - `getEndpointConfig(uid)` — `GET /endpointConfigs/{uid}`
+  - `putEndpointConfig(uid, data)` — `PUT /endpointConfigs/{uid}`
+  - `deleteEndpointConfig(uid)` — `DELETE /endpointConfigs/{uid}`
+  - `canDeployEndpointConfig(uid)` — `GET /endpointConfigs/{uid}/canDeploy`
+  - `deployEndpointConfig(uid)` — `POST /endpointConfigs/{uid}/deploy`
+  - `undeployEndpointConfig(uid)` — `POST /endpointConfigs/{uid}/undeploy`
+  - `listEndpointConfigs(data)` — `POST /list/endpointConfigs`
+  - `createThrottlingConfig(data)` — `POST /throttlingConfigs`
+  - `getThrottlingConfig(uid)` — `GET /throttlingConfigs/{uid}`
+  - `putThrottlingConfig(uid, data)` — `PUT /throttlingConfigs/{uid}`
+  - `deleteThrottlingConfig(uid)` — `DELETE /throttlingConfigs/{uid}`
+  - `canDeployThrottlingConfig(uid)` — `GET /throttlingConfigs/{uid}/canDeploy`
+  - `deployThrottlingConfig(uid)` — `POST /throttlingConfigs/{uid}/deploy`
+  - `undeployThrottlingConfig(uid)` — `POST /throttlingConfigs/{uid}/undeploy`
+  - `listThrottlingConfigs(data)` — `POST /list/throttlingConfigs`
 
 ### `loyalty-challenges.yaml`
 - **Title:** AJO Customer Loyalty Challenge State API
