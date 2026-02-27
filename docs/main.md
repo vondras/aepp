@@ -2,6 +2,16 @@
 
 This documentation is focused on the methods available directly from the `aepp` module.
 
+## Adobe Journey Optimizer (AJO) support
+
+`aepp` includes a `JourneyOptimizer` client for the Adobe Journey Optimizer API.
+See [ajo.md](./ajo.md) for configuration, required scopes, and usage examples.
+
+```shell
+pip install aepp        # base install (AJO included)
+pip install aepp[ajo]   # semantic extra (no additional dependencies)
+```
+
 ## Creating a config file
 
 When starting with the `aepp` module, you will need to create a configuration file.\
