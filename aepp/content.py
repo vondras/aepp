@@ -150,7 +150,7 @@ class Content(_AJOBase):
         res = self.connector.putData(self.endpoint + path, data=data, headers=headers)
         return res
 
-    def deleteTemplate(self, templateId: str) -> dict:
+    def deleteTemplate(self, templateId: str) -> Union[int, dict]:
         """
         Delete a content template by ID.
         Implements DELETE /ajo/content/templates/{templateId}

@@ -96,7 +96,7 @@ class Orchestration(_AJOBase):
         res = self.connector.putData(self.endpoint + path, data=data)
         return res
 
-    def deleteEndpointConfig(self, uid: str) -> dict:
+    def deleteEndpointConfig(self, uid: str) -> Union[int, dict]:
         """
         Delete a capping configuration by UID.
         Implements DELETE /journey/orchestration/endpointConfigs/{uid}
@@ -222,7 +222,7 @@ class Orchestration(_AJOBase):
         res = self.connector.putData(self.endpoint + path, data=data)
         return res
 
-    def deleteThrottlingConfig(self, uid: str) -> dict:
+    def deleteThrottlingConfig(self, uid: str) -> Union[int, dict]:
         """
         Delete a throttling configuration by UID.
         Implements DELETE /journey/orchestration/throttlingConfigs/{uid}

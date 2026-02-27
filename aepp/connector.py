@@ -25,7 +25,7 @@ from pathlib import Path
 class TokenError(Exception):
     """
     Raised when an IMS token cannot be retrieved or is malformed.
-    The message includes a bounded (≤200-char) snippet of the raw response body.
+    The message includes a bounded (≤200-char) snippet of the response content.
     """
     pass
 
