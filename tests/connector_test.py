@@ -61,3 +61,12 @@ class TokenErrorTest(unittest.TestCase):
         assert isinstance(result, TokenInfo)
         assert result.token == "tok123"
         assert result.expiry == 86399
+
+    def test_token_error_raised_on_non_json_response(self):
+        conn = self._make_connector()
+        mock_response = MagicMock()
+        mock_response.json.side_effect = ValueError("No JSON object could be decoded")
+        mock_response.text = "<html><body>Bad Gateway</body></html>"
+        with self.assertRaises(TokenError) as ctx:
+            conn._token_postprocess(response=mock_response)
+        assert "non-JSON" in str(ctx.exception)

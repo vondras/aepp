@@ -309,7 +309,7 @@ class Synchronizer:
             elif componentType == 'contentTemplate':
                 if self.baseConfig is not None:
                     cm_base = content_module.Content(config=self.baseConfig)
-                    base_templates = cm_base.list_templates().get('items', [])
+                    base_templates = cm_base.listTemplates().get('items', [])
                     match = next((t for t in base_templates if t.get('id') == component or t.get('name') == component), None)
                     if match is None:
                         raise ValueError(f"content template '{component}' could not be found in the base sandbox")
@@ -378,12 +378,9 @@ class Synchronizer:
         Synchronize all the components to the target sandboxes.
         It will synchronize the components in the following order: 
         1. Identities
-        2. Data Types
-        3. Classes
-        4. Field Groups
-        5. Schemas
-        6. Datasets
-        7. Content Templates (optional, enabled by syncContentTemplates=True)
+        2. Schemas (including their field groups, data types, and classes)
+        3. Datasets
+        4. Content Templates (optional, enabled by syncContentTemplates=True)
         Because the Merge Policies and Audiences needs the dataset and schema to be enabled in the target sandbox, and the synchronizer does not currently support enabling them for UPS.
         They will not sync with that method.
         A variable syncIssues will be created to gather the artefacts that could not be synchronized.
@@ -1331,30 +1328,41 @@ class Synchronizer:
         """
         if not isinstance(baseTemplate, dict):
             raise TypeError("baseTemplate must be a dictionary")
-        template_name = baseTemplate.get('name', '')
-        self.dict_baseComponents['contentTemplate'][template_name] = baseTemplate
+        template_name = baseTemplate.get('name')
+        template_id = baseTemplate.get('id')
+        # Determine a stable key for caching and matching. Prefer name, fall back to id.
+        if template_name:
+            cache_key = template_name
+            match_field, match_value = 'name', template_name
+        elif template_id:
+            cache_key = template_id
+            match_field, match_value = 'id', template_id
+        else:
+            raise ValueError("baseTemplate must contain a non-empty 'name' or an 'id' to synchronize content templates")
+        self.dict_baseComponents['contentTemplate'][cache_key] = baseTemplate
         # Strip server-managed fields that must not be sent on create/update
         _read_only_keys = {'id', 'createdAt', 'modifiedAt', 'createdBy', 'modifiedBy',
                            'imsOrgId', 'sandboxId', 'sandboxName', 'origin', 'status',
                            'audit', '_links'}
         template_payload = {k: v for k, v in baseTemplate.items() if k not in _read_only_keys}
+        display_identifier = template_name or template_id
         for target in self.dict_targetsConfig.keys():
             cm_target = content_module.Content(config=self.dict_targetsConfig[target])
             t_templates = cm_target.listTemplates().get('items', [])
-            existing = next((t for t in t_templates if t.get('name') == template_name), None)
+            existing = next((t for t in t_templates if t.get(match_field) == match_value), None)
             if existing is None:
                 if verbose:
-                    print(f"content template '{template_name}' does not exist in target {target}, creating it")
+                    print(f"content template '{display_identifier}' does not exist in target {target}, creating it")
                 res = cm_target.createTemplate(template_payload)
-                self.dict_targetComponents[target]['contentTemplate'][template_name] = res
+                self.dict_targetComponents[target]['contentTemplate'][cache_key] = res
             else:
                 if verbose:
-                    print(f"content template '{template_name}' already exists in target {target}")
+                    print(f"content template '{display_identifier}' already exists in target {target}")
                 if force:
                     if verbose:
-                        print(f"force=True: updating '{template_name}' in target {target}")
+                        print(f"force=True: updating '{display_identifier}' in target {target}")
                     res = cm_target.putTemplate(existing['id'], template_payload)
-                    self.dict_targetComponents[target]['contentTemplate'][template_name] = existing
+                    self.dict_targetComponents[target]['contentTemplate'][cache_key] = res
                 else:
-                    self.dict_targetComponents[target]['contentTemplate'][template_name] = existing
+                    self.dict_targetComponents[target]['contentTemplate'][cache_key] = existing
 

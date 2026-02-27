@@ -184,6 +184,7 @@ class Content(_AJOBase):
             self.logger.debug(f"Starting patchTemplate with id: {templateId}")
         path = f"/templates/{templateId}"
         headers = deepcopy(self.header)
+        headers["Content-Type"] = "application/json-patch+json"
         if if_match is not None:
             headers["If-Match"] = if_match
         res = self.connector.patchData(
@@ -308,6 +309,7 @@ class Content(_AJOBase):
             self.logger.debug(f"Starting patchFragment with id: {fragmentId}")
         path = f"/fragments/{fragmentId}"
         headers = deepcopy(self.header)
+        headers["Content-Type"] = "application/json-patch+json"
         if if_match is not None:
             headers["If-Match"] = if_match
         res = self.connector.patchData(

@@ -196,7 +196,11 @@ class AdobeRequest:
             verbose : OPTIONAL : Default False. If set to True, print information.
             save : OPTIONAL : Default False. If set to True, save the toke in the .
         """
-        json_response = response.json()
+        try:
+            json_response = response.json()
+        except ValueError:
+            snippet = response.text[:200]
+            raise TokenError(f"Token endpoint returned a non-JSON response: {snippet}")
         try:
             self.token = json_response["access_token"]
             self.config["token"] = self.token

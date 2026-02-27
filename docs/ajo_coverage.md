@@ -75,7 +75,7 @@ and the corresponding `aepp` Python wrapper modules.
 - **Tags:** Capping configuration, Throttling configuration
 - **Operations:** 16
 - **Prod server:** `https://platform.adobe.io/journey/orchestration`
-- **Key paths:** `POST, GET /endpointConfigs`, `GET, PUT, DELETE /endpointConfigs/{uid}`, `GET /endpointConfigs/canDeploy/{uid}`, `POST, GET /throttlingConfigs`, `GET, PUT, DELETE /throttlingConfigs/{uid}`, `POST /throttlingConfigs/{uid}/deploy`, `POST /throttlingConfigs/{uid}/undeploy`
+- **Key paths:** `POST /endpointConfigs`, `GET, PUT, DELETE /endpointConfigs/{uid}`, `GET /endpointConfigs/{uid}/canDeploy`, `POST /endpointConfigs/{uid}/deploy`, `POST /endpointConfigs/{uid}/undeploy`, `POST /list/endpointConfigs`, `POST /throttlingConfigs`, `GET, PUT, DELETE /throttlingConfigs/{uid}`, `GET /throttlingConfigs/{uid}/canDeploy`, `POST /throttlingConfigs/{uid}/deploy`, `POST /throttlingConfigs/{uid}/undeploy`, `POST /list/throttlingConfigs`
 
 ### `loyalty-challenges.yaml`
 - **Title:** AJO Customer Loyalty Challenge State API
