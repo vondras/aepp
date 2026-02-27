@@ -335,7 +335,7 @@ class Content(_AJOBase):
     def getLiveFragment(self, fragmentId: str) -> dict:
         """
         Retrieve the live (published) version of a fragment.
-        Implements GET /ajo/content/fragments/{fragmentId}/liveFragment
+        Implements GET /ajo/content/fragments/{fragmentId}/live
         Arguments:
             fragmentId : REQUIRED : The content fragment ID.
         """
@@ -343,7 +343,7 @@ class Content(_AJOBase):
             raise ValueError("A fragment ID is required.")
         if self.loggingEnabled:
             self.logger.debug(f"Starting getLiveFragment with id: {fragmentId}")
-        path = f"/fragments/{fragmentId}/liveFragment"
+        path = f"/fragments/{fragmentId}/live"
         headers = deepcopy(self.header)
         headers["Accept"] = _FRAGMENT_CONTENT_TYPE
         res = self.connector.getData(self.endpoint + path, headers=headers)
@@ -352,7 +352,7 @@ class Content(_AJOBase):
     def getLastPublicationStatus(self, fragmentId: str) -> dict:
         """
         Retrieve the last publication status of a fragment.
-        Implements GET /ajo/content/fragments/{fragmentId}/lastPublicationStatus
+        Implements GET /ajo/content/fragments/{fragmentId}/publications/latest
         Arguments:
             fragmentId : REQUIRED : The content fragment ID.
         """
@@ -362,6 +362,6 @@ class Content(_AJOBase):
             self.logger.debug(
                 f"Starting getLastPublicationStatus with id: {fragmentId}"
             )
-        path = f"/fragments/{fragmentId}/lastPublicationStatus"
+        path = f"/fragments/{fragmentId}/publications/latest"
         res = self.connector.getData(self.endpoint + path)
         return res

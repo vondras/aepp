@@ -53,7 +53,7 @@ class Journey(_AJOBase):
     ) -> dict:
         """
         Returns a list of journeys based on the provided filters.
-        Implements GET /ajo/journey
+        Implements GET /ajo/journeys
         Arguments:
             filter : OPTIONAL : URL-encoded search filters (e.g. "status=draft").
             page : OPTIONAL : Page number for pagination (0-based).
@@ -63,7 +63,7 @@ class Journey(_AJOBase):
         """
         if self.loggingEnabled:
             self.logger.debug("Starting getJourneys")
-        path = "/journey"
+        path = "/journeys"
         params = {}
         if filter is not None:
             params["filter"] = filter
@@ -81,7 +81,7 @@ class Journey(_AJOBase):
     def getJourney(self, journeyId: str, include: str = None) -> dict:
         """
         Returns a journey by its ID.
-        Implements GET /ajo/journey/{id}
+        Implements GET /ajo/journeys/{journeyId}
         Arguments:
             journeyId : REQUIRED : The journey ID.
             include : OPTIONAL : Comma-separated list of additional data to include
@@ -91,7 +91,7 @@ class Journey(_AJOBase):
             raise ValueError("A journey ID is required.")
         if self.loggingEnabled:
             self.logger.debug(f"Starting getJourney with id: {journeyId}")
-        path = f"/journey/{journeyId}"
+        path = f"/journeys/{journeyId}"
         params = {}
         if include is not None:
             params["include"] = include

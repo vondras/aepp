@@ -14,6 +14,12 @@ from aepp._ajobase import create_ajo_client
 from aepp.journey import Journey
 from aepp.content import Content
 from aepp.orchestration import Orchestration
+from aepp.campaigns import Campaigns
+from aepp.loyalty import Loyalty
+from aepp.messaging import Messaging
+from aepp.suppression import Suppression
+from aepp.simulations import Simulations
+from aepp.orchestrateddataset import OrchestratedDataset
 
 
 class AJOBaseTest(unittest.TestCase):
@@ -32,6 +38,36 @@ class AJOBaseTest(unittest.TestCase):
     def test_factory_orchestration(self, mock_connector):
         obj = create_ajo_client("orchestration")
         assert isinstance(obj, Orchestration)
+
+    @patch("aepp.connector.AdobeRequest")
+    def test_factory_campaigns(self, mock_connector):
+        obj = create_ajo_client("campaigns")
+        assert isinstance(obj, Campaigns)
+
+    @patch("aepp.connector.AdobeRequest")
+    def test_factory_loyalty(self, mock_connector):
+        obj = create_ajo_client("loyalty")
+        assert isinstance(obj, Loyalty)
+
+    @patch("aepp.connector.AdobeRequest")
+    def test_factory_messaging(self, mock_connector):
+        obj = create_ajo_client("messaging")
+        assert isinstance(obj, Messaging)
+
+    @patch("aepp.connector.AdobeRequest")
+    def test_factory_suppression(self, mock_connector):
+        obj = create_ajo_client("suppression")
+        assert isinstance(obj, Suppression)
+
+    @patch("aepp.connector.AdobeRequest")
+    def test_factory_simulations(self, mock_connector):
+        obj = create_ajo_client("simulations")
+        assert isinstance(obj, Simulations)
+
+    @patch("aepp.connector.AdobeRequest")
+    def test_factory_orchestrateddataset(self, mock_connector):
+        obj = create_ajo_client("orchestrateddataset")
+        assert isinstance(obj, OrchestratedDataset)
 
     @patch("aepp.connector.AdobeRequest")
     def test_factory_case_insensitive(self, mock_connector):

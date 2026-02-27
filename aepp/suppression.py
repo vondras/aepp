@@ -265,9 +265,10 @@ class Suppression(_AJOBase):
             self.logger.debug("Starting uploadSuppression")
         path = "/config/suppression/uploads"
         with open(file_path, "rb") as f:
-            return self.connector.postData(
-                self.endpoint + path, data={"file": f}
-            )
+            file_bytes = f.read()
+        return self.connector.postData(
+            self.endpoint + path, bytesData=file_bytes
+        )
 
     def listUploadJobs(
         self,
