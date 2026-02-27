@@ -22,6 +22,14 @@ import requests
 from requests import Response
 from pathlib import Path
 
+class TokenError(Exception):
+    """
+    Raised when an IMS token cannot be retrieved or is malformed.
+    The message includes a bounded (≤200-char) snippet of the response content.
+    """
+    pass
+
+
 @dataclass
 class TokenInfo:
     """
@@ -193,9 +201,13 @@ class AdobeRequest:
             self.token = json_response["access_token"]
             self.config["token"] = self.token
         except KeyError:
-            print("Issue retrieving token")
-            print(json_response)
-        expiry = json_response["expires_in"]
+            snippet = str(json_response)[:200]
+            raise TokenError(f"Failed to retrieve access_token from IMS response: {snippet}")
+        try:
+            expiry = json_response["expires_in"]
+        except KeyError:
+            snippet = str(json_response)[:200]
+            raise TokenError(f"Missing expires_in in IMS response: {snippet}")
         if save:
             with open("token.txt", "w") as f:
                 f.write(self.token)

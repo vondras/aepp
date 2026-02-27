@@ -64,5 +64,8 @@ endpoints = {
         "inlet": "",
         "collection": "https://dcs.adobedc.net"
     },
-    "audit": "/data/foundation"
+    "audit": "/data/foundation",
+    "ajo": "/ajo",
+    "ajo_content": "/ajo/content",
+    "ajo_orchestration": "/journey/orchestration"
 }
