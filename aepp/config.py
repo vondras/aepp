@@ -22,7 +22,8 @@ config_object = {
     "token": "",
     "oauthTokenEndpointV1": "",
     "oauthTokenEndpointV2": "",
-    "imsEndpoint": ""
+    "imsEndpoint": "",
+    "ajo_base_url": None
 }
 
 header = {"Accept": "application/json",

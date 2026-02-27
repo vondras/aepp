@@ -11,6 +11,7 @@
 import json
 import aepp
 from aepp import schema, schemamanager, fieldgroupmanager, datatypemanager,classmanager,identity,catalog,customerprofile,segmentation
+from aepp import contentmanager
 from copy import deepcopy
 from typing import Union
 from pathlib import Path
@@ -79,6 +80,7 @@ class Synchronizer:
             self.mergePolicyFolder = [folder / 'mergepolicy' for folder in self.localfolder]
             self.audienceFolder = [folder / 'audience' for folder in self.localfolder]
             self.tagFolder = [folder / 'tag' for folder in self.localfolder]
+            self.contentTemplateFolder = [folder / 'contentTemplate' for folder in self.localfolder]
             for folder in self.tagFolder:
                 try:
                     if folder.exists():
@@ -104,15 +106,15 @@ class Synchronizer:
                     raise ValueError("baseSandbox must be provided in the constructor or in the config.json file in the local folder")
         self.dict_targetsConfig = {target: aepp.configure(org_id=config_object['org_id'],client_id=config_object['client_id'],scopes=config_object['scopes'],secret=config_object['secret'],sandbox=target,connectInstance=True) for target in targets}
         self.region = region
-        self.dict_baseComponents = {'schema':{},'class':{},'fieldgroup':{},'datatype':{},'datasets':{},'identities':{},"schemaDescriptors":{},'mergePolicy':{},'audience':{}}  
-        self.dict_targetComponents = {target:{'schema':{},'class':{},'fieldgroup':{},'datatype':{},'datasets':{},'identities':{},"schemaDescriptors":{},'mergePolicy':{},'audience':{}} for target in targets}
+        self.dict_baseComponents = {'schema':{},'class':{},'fieldgroup':{},'datatype':{},'datasets':{},'identities':{},"schemaDescriptors":{},'mergePolicy':{},'audience':{},'contentTemplate':{}}  
+        self.dict_targetComponents = {target:{'schema':{},'class':{},'fieldgroup':{},'datatype':{},'datasets':{},'identities':{},"schemaDescriptors":{},'mergePolicy':{},'audience':{},'contentTemplate':{}} for target in targets}
 
     def flush_cache(self)-> None:
         """
         Flush the component cache of the synchronizer. It will clear the cache of the base sandbox and the target sandboxes.
         """
-        self.dict_baseComponents = {'schema':{},'class':{},'fieldgroup':{},'datatype':{},'datasets':{},'identities':{},"schemaDescriptors":{},'mergePolicy':{},'audience':{}}  
-        self.dict_targetComponents = {target:{'schema':{},'class':{},'fieldgroup':{},'datatype':{},'datasets':{},'identities':{},"schemaDescriptors":{},'mergePolicy':{},'audience':{}} for target in self.dict_targetsConfig.keys()}
+        self.dict_baseComponents = {'schema':{},'class':{},'fieldgroup':{},'datatype':{},'datasets':{},'identities':{},"schemaDescriptors":{},'mergePolicy':{},'audience':{},'contentTemplate':{}}  
+        self.dict_targetComponents = {target:{'schema':{},'class':{},'fieldgroup':{},'datatype':{},'datasets':{},'identities':{},"schemaDescriptors":{},'mergePolicy':{},'audience':{},'contentTemplate':{}} for target in self.dict_targetsConfig.keys()}
 
     def getSyncFieldGroupManager(self,fieldgroup:str,sandbox:str|None=None)-> dict:
         """
@@ -185,8 +187,8 @@ class Synchronizer:
                 raise ValueError("a base sandbox or a local folder must be provided to synchronize a component by name or id")
             if componentType is None:
                 raise ValueError("the type of the component must be provided if the component is a string")
-            if componentType not in ['schema', 'fieldgroup', 'datatypes', 'class', 'identity', 'dataset', 'mergepolicy', 'audience']:
-                raise ValueError("the type of the component is not supported. Please provide one of the following types: schema, fieldgroup, datatypes, class, identity, dataset, mergepolicy, audience")
+            if componentType not in ['schema', 'fieldgroup', 'datatypes', 'class', 'identity', 'dataset', 'mergepolicy', 'audience', 'contentTemplate']:
+                raise ValueError("the type of the component is not supported. Please provide one of the following types: schema, fieldgroup, datatypes, class, identity, dataset, mergepolicy, audience, contentTemplate")
             if componentType in ['schema', 'fieldgroup', 'datatypes', 'class']:
                 if self.baseConfig is not None:
                     base_schema = schema.Schema(config=self.baseConfig)
@@ -304,6 +306,29 @@ class Synchronizer:
                                     au_file['tags'] = [self.dict_tag_name_id[tag_name] for tag_name in au_file.get('tags',[]) if tag_name in self.dict_tag_name_id.keys()]
                                 component = au_file
                                 break
+            elif componentType == 'contentTemplate':
+                if self.baseConfig is not None:
+                    cm_base = contentmanager.ContentManager(config=self.baseConfig)
+                    base_templates = cm_base.list_templates().get('items', [])
+                    match = next((t for t in base_templates if t.get('id') == component or t.get('name') == component), None)
+                    if match is None:
+                        raise ValueError(f"content template '{component}' could not be found in the base sandbox")
+                    component = match
+                elif self.localfolder is not None:
+                    found = False
+                    for folder in self.contentTemplateFolder:
+                        if not folder.exists():
+                            continue
+                        for file in folder.glob('*.json'):
+                            ct_file = json.load(FileIO(file))
+                            if ct_file.get('id', '') == component or ct_file.get('name', '') == component:
+                                component = ct_file
+                                found = True
+                                break
+                        if found:
+                            break
+                    if not found:
+                        raise ValueError(f"content template '{component}' could not be found in the local folder")
         elif type(component) == dict:
             if 'meta:resourceType' in component.keys():
                 componentType = component['meta:resourceType']
@@ -344,9 +369,11 @@ class Synchronizer:
             self.__syncMergePolicy__(component,verbose=verbose)
         if componentType == 'audience':
             self.__syncAudience__(component,verbose=verbose,force=force)
+        if componentType == 'contentTemplate':
+            self.__syncContentTemplate__(component,verbose=verbose,force=force)
 
     
-    def syncAll(self,force:bool=False,verbose:bool=False)-> None:
+    def syncAll(self,force:bool=False,verbose:bool=False,syncContentTemplates:bool=False)-> None:
         """
         Synchronize all the components to the target sandboxes.
         It will synchronize the components in the following order: 
@@ -356,16 +383,19 @@ class Synchronizer:
         4. Field Groups
         5. Schemas
         6. Datasets
+        7. Content Templates (optional, enabled by syncContentTemplates=True)
         Because the Merge Policies and Audiences needs the dataset and schema to be enabled in the target sandbox, and the synchronizer does not currently support enabling them for UPS.
         They will not sync with that method.
         A variable syncIssues will be created to gather the artefacts that could not be synchronized.
         Arguments:
             force : OPTIONAL : if True, it will force the synchronization of the components even if they already exist in the target sandbox. Works for Schema, FieldGroup, DataType and Class.
             verbose : OPTIONAL : if True, it will print the details of the synchronization process
+            syncContentTemplates : OPTIONAL : if True, content templates will also be synchronized. Requires the AJO ContentManager to be available.
         """
         base_identities = []
         base_schemas = []
         base_datasets = []
+        base_content_templates = []
         self.syncIssues = []
         if self.baseConfig is not None:
             if verbose:
@@ -379,6 +409,9 @@ class Synchronizer:
                 mySchemaManager = schemamanager.SchemaManager(sch,config=self.baseConfig) 
                 base_schemas.append(mySchemaManager)
             base_datasets = baseCatalog.getDataSets(output='list')
+            if syncContentTemplates:
+                cm_base = contentmanager.ContentManager(config=self.baseConfig)
+                base_content_templates = cm_base.list_templates().get('items', [])
         elif self.localfolder is not None:
             if verbose:
                 print("Loading base components from the local folder...")
@@ -397,6 +430,12 @@ class Synchronizer:
                     if len(ds_file.get('unifiedTags',[])) > 0 and self.dict_tag_name_id is not None:
                         ds_file['unifiedTags'] = [self.dict_tag_name_id[tag_name] for tag_name in ds_file.get('unifiedTags',[]) if tag_name in self.dict_tag_name_id.keys()]
                     base_datasets.append(ds_file)
+            if syncContentTemplates:
+                for folder in self.contentTemplateFolder:
+                    if folder.exists():
+                        for file in folder.glob('*.json'):
+                            ct_file = json.load(FileIO(file))
+                            base_content_templates.append(ct_file)
         else:
             raise ValueError("a base sandbox or a local folder must be provided to synchronize the components")
         ### syncing identities
@@ -423,6 +462,15 @@ class Synchronizer:
                 self.__syncDataset__(ds,force=force,verbose=verbose)
             except Exception as e:
                 self.syncIssues.append({'component':ds.get('name','id not found'),'type':'dataset','error':str(e)})
+        ### Syncing content templates
+        if syncContentTemplates:
+            if verbose:
+                print("Syncing Content Templates...")
+            for ct in base_content_templates:
+                try:
+                    self.__syncContentTemplate__(ct,force=force,verbose=verbose)
+                except Exception as e:
+                    self.syncIssues.append({'component':ct.get('name','id not found'),'type':'contentTemplate','error':str(e)})
 
             
     def __syncClass__(self,baseClass:classmanager.ClassManager,force:bool=False,verbose:bool=False)-> dict:
@@ -1265,4 +1313,48 @@ class Synchronizer:
                     self.dict_targetComponents[target]['audience'][audience_name] = res
                 else: 
                     self.dict_targetComponents[target]['audience'][audience_name] = [el for el in t_audiences if el['name'] == audience_name][0]
+
+    def __syncContentTemplate__(self, baseTemplate: dict, force: bool = False, verbose: bool = False) -> None:
+        """
+        Synchronize an AJO content template to all target sandboxes.
+
+        If a template with the same ``name`` already exists in the target sandbox
+        it is left unchanged unless ``force=True``, in which case it is replaced
+        via ``update_template``.
+
+        Arguments:
+            baseTemplate : REQUIRED : Content template dict as returned by
+                           ``ContentManager.list_templates`` or ``get_template``.
+            force : OPTIONAL : When True, overwrite an existing template with the
+                    same name in the target sandbox.
+            verbose : OPTIONAL : When True, print progress messages.
+        """
+        if not isinstance(baseTemplate, dict):
+            raise TypeError("baseTemplate must be a dictionary")
+        template_name = baseTemplate.get('name', '')
+        self.dict_baseComponents['contentTemplate'][template_name] = baseTemplate
+        # Strip server-managed fields that must not be sent on create/update
+        _read_only_keys = {'id', 'createdAt', 'modifiedAt', 'createdBy', 'modifiedBy',
+                           'imsOrgId', 'sandboxId', 'sandboxName', 'origin', 'status',
+                           'audit', '_links'}
+        template_payload = {k: v for k, v in baseTemplate.items() if k not in _read_only_keys}
+        for target in self.dict_targetsConfig.keys():
+            cm_target = contentmanager.ContentManager(config=self.dict_targetsConfig[target])
+            t_templates = cm_target.list_templates().get('items', [])
+            existing = next((t for t in t_templates if t.get('name') == template_name), None)
+            if existing is None:
+                if verbose:
+                    print(f"content template '{template_name}' does not exist in target {target}, creating it")
+                res = cm_target.create_template(template_payload)
+                self.dict_targetComponents[target]['contentTemplate'][template_name] = res
+            else:
+                if verbose:
+                    print(f"content template '{template_name}' already exists in target {target}")
+                if force:
+                    if verbose:
+                        print(f"force=True: updating '{template_name}' in target {target}")
+                    res = cm_target.update_template(existing['id'], template_payload)
+                    self.dict_targetComponents[target]['contentTemplate'][template_name] = existing
+                else:
+                    self.dict_targetComponents[target]['contentTemplate'][template_name] = existing
 
