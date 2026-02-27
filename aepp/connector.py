@@ -22,23 +22,13 @@ import requests
 from requests import Response
 from pathlib import Path
 
-
-class TokenResponseError(Exception):
+class TokenError(Exception):
     """
-    Raised when the IMS token endpoint returns an error or an unexpected response.
-
-    Attributes:
-        status_code : HTTP status code from the token endpoint response.
-        response_snippet : Bounded snippet of the response body (up to 4 KB) to aid
-                           debugging without exposing full payloads.
-        endpoint_host : Hostname of the token endpoint (no secrets included).
+    Raised when an IMS token cannot be retrieved or is malformed.
+    The message includes a bounded (≤200-char) snippet of the response content.
     """
+    pass
 
-    def __init__(self, message: str, status_code: int, response_snippet: str, endpoint_host: str) -> None:
-        super().__init__(message)
-        self.status_code = status_code
-        self.response_snippet = response_snippet
-        self.endpoint_host = endpoint_host
 
 @dataclass
 class TokenInfo:
@@ -206,40 +196,18 @@ class AdobeRequest:
             verbose : OPTIONAL : Default False. If set to True, print information.
             save : OPTIONAL : Default False. If set to True, save the toke in the .
         """
-        _MAX_SNIPPET = 4096
-        status_code = response.status_code
+        json_response = response.json()
         try:
-            json_response = response.json()
-        except Exception:
-            snippet = response.text[:_MAX_SNIPPET]
-            host = response.url.split("/")[2] if response.url else "unknown"
-            raise TokenResponseError(
-                f"Token endpoint returned a non-JSON response (HTTP {status_code}).",
-                status_code=status_code,
-                response_snippet=snippet,
-                endpoint_host=host,
-            )
-        if "access_token" not in json_response:
-            snippet = response.text[:_MAX_SNIPPET]
-            host = response.url.split("/")[2] if response.url else "unknown"
-            raise TokenResponseError(
-                f"Token endpoint did not return 'access_token' (HTTP {status_code}).",
-                status_code=status_code,
-                response_snippet=snippet,
-                endpoint_host=host,
-            )
-        if "expires_in" not in json_response:
-            snippet = response.text[:_MAX_SNIPPET]
-            host = response.url.split("/")[2] if response.url else "unknown"
-            raise TokenResponseError(
-                f"Token endpoint did not return 'expires_in' (HTTP {status_code}).",
-                status_code=status_code,
-                response_snippet=snippet,
-                endpoint_host=host,
-            )
-        self.token = json_response["access_token"]
-        self.config["token"] = self.token
-        expiry = json_response["expires_in"]
+            self.token = json_response["access_token"]
+            self.config["token"] = self.token
+        except KeyError:
+            snippet = str(json_response)[:200]
+            raise TokenError(f"Failed to retrieve access_token from IMS response: {snippet}")
+        try:
+            expiry = json_response["expires_in"]
+        except KeyError:
+            snippet = str(json_response)[:200]
+            raise TokenError(f"Missing expires_in in IMS response: {snippet}")
         if save:
             with open("token.txt", "w") as f:
                 f.write(self.token)

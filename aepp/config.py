@@ -22,8 +22,7 @@ config_object = {
     "token": "",
     "oauthTokenEndpointV1": "",
     "oauthTokenEndpointV2": "",
-    "imsEndpoint": "",
-    "ajo_base_url": None
+    "imsEndpoint": ""
 }
 
 header = {"Accept": "application/json",
@@ -65,5 +64,8 @@ endpoints = {
         "inlet": "",
         "collection": "https://dcs.adobedc.net"
     },
-    "audit": "/data/foundation"
+    "audit": "/data/foundation",
+    "ajo": "/ajo",
+    "ajo_content": "/ajo/content",
+    "ajo_orchestration": "/journey/orchestration"
 }

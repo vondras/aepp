@@ -11,7 +11,7 @@
 import json
 import aepp
 from aepp import schema, schemamanager, fieldgroupmanager, datatypemanager,classmanager,identity,catalog,customerprofile,segmentation
-from aepp import contentmanager
+from aepp import content as content_module
 from copy import deepcopy
 from typing import Union
 from pathlib import Path
@@ -308,7 +308,7 @@ class Synchronizer:
                                 break
             elif componentType == 'contentTemplate':
                 if self.baseConfig is not None:
-                    cm_base = contentmanager.ContentManager(config=self.baseConfig)
+                    cm_base = content_module.Content(config=self.baseConfig)
                     base_templates = cm_base.list_templates().get('items', [])
                     match = next((t for t in base_templates if t.get('id') == component or t.get('name') == component), None)
                     if match is None:
@@ -390,7 +390,7 @@ class Synchronizer:
         Arguments:
             force : OPTIONAL : if True, it will force the synchronization of the components even if they already exist in the target sandbox. Works for Schema, FieldGroup, DataType and Class.
             verbose : OPTIONAL : if True, it will print the details of the synchronization process
-            syncContentTemplates : OPTIONAL : if True, content templates will also be synchronized. Requires the AJO ContentManager to be available.
+            syncContentTemplates : OPTIONAL : if True, content templates will also be synchronized. Requires the AJO Content module to be available.
         """
         base_identities = []
         base_schemas = []
@@ -410,8 +410,8 @@ class Synchronizer:
                 base_schemas.append(mySchemaManager)
             base_datasets = baseCatalog.getDataSets(output='list')
             if syncContentTemplates:
-                cm_base = contentmanager.ContentManager(config=self.baseConfig)
-                base_content_templates = cm_base.list_templates().get('items', [])
+                cm_base = content_module.Content(config=self.baseConfig)
+                base_content_templates = cm_base.listTemplates().get('items', [])
         elif self.localfolder is not None:
             if verbose:
                 print("Loading base components from the local folder...")
@@ -1320,11 +1320,11 @@ class Synchronizer:
 
         If a template with the same ``name`` already exists in the target sandbox
         it is left unchanged unless ``force=True``, in which case it is replaced
-        via ``update_template``.
+        via ``putTemplate``.
 
         Arguments:
             baseTemplate : REQUIRED : Content template dict as returned by
-                           ``ContentManager.list_templates`` or ``get_template``.
+                           ``Content.listTemplates`` or ``Content.getTemplate``.
             force : OPTIONAL : When True, overwrite an existing template with the
                     same name in the target sandbox.
             verbose : OPTIONAL : When True, print progress messages.
@@ -1339,13 +1339,13 @@ class Synchronizer:
                            'audit', '_links'}
         template_payload = {k: v for k, v in baseTemplate.items() if k not in _read_only_keys}
         for target in self.dict_targetsConfig.keys():
-            cm_target = contentmanager.ContentManager(config=self.dict_targetsConfig[target])
-            t_templates = cm_target.list_templates().get('items', [])
+            cm_target = content_module.Content(config=self.dict_targetsConfig[target])
+            t_templates = cm_target.listTemplates().get('items', [])
             existing = next((t for t in t_templates if t.get('name') == template_name), None)
             if existing is None:
                 if verbose:
                     print(f"content template '{template_name}' does not exist in target {target}, creating it")
-                res = cm_target.create_template(template_payload)
+                res = cm_target.createTemplate(template_payload)
                 self.dict_targetComponents[target]['contentTemplate'][template_name] = res
             else:
                 if verbose:
@@ -1353,7 +1353,7 @@ class Synchronizer:
                 if force:
                     if verbose:
                         print(f"force=True: updating '{template_name}' in target {target}")
-                    res = cm_target.update_template(existing['id'], template_payload)
+                    res = cm_target.putTemplate(existing['id'], template_payload)
                     self.dict_targetComponents[target]['contentTemplate'][template_name] = existing
                 else:
                     self.dict_targetComponents[target]['contentTemplate'][template_name] = existing

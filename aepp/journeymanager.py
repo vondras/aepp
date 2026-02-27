@@ -16,7 +16,7 @@ class JourneyManager:
     """
     Manager for a single Adobe Journey Optimizer journey object.
 
-    Wraps the raw journey dict returned by ``JourneyOptimizer.get_journey``
+    Wraps the raw journey dict returned by ``Journey.getJourney``
     and exposes typed helpers for common access patterns (node enumeration,
     status checks, campaign retrieval, etc.).  The manager does not make any
     network calls unless you explicitly call a method that requires one.
@@ -26,29 +26,29 @@ class JourneyManager:
 
     Arguments:
         journey : REQUIRED : Either the journey ID string or the journey dict
-                  returned by ``JourneyOptimizer.get_journey``.
-        optimizer : OPTIONAL : A ``JourneyOptimizer`` instance.  Required when
-                    ``journey`` is an ID string so that the journey definition
-                    can be fetched from the API.
+                  returned by ``Journey.getJourney``.
+        journey_client : OPTIONAL : A ``Journey`` instance.  Required when
+                         ``journey`` is an ID string so that the journey
+                         definition can be fetched from the API.
         include : OPTIONAL : Comma-separated enrichment keys forwarded to
-                  ``JourneyOptimizer.get_journey`` when fetching by ID
+                  ``Journey.getJourney`` when fetching by ID
                   (e.g. ``"campaigns,rulesets"``).
     """
 
     def __init__(
         self,
         journey: Union[str, dict],
-        optimizer=None,
+        journey_client=None,
         include: Optional[str] = None,
     ) -> None:
         if isinstance(journey, dict):
             self._journey = journey
         elif isinstance(journey, str):
-            if optimizer is None:
+            if journey_client is None:
                 raise ValueError(
-                    "An optimizer instance is required when journey is an ID string."
+                    "A journey_client instance is required when journey is an ID string."
                 )
-            self._journey = optimizer.get_journey(journey, include=include)
+            self._journey = journey_client.getJourney(journey, include=include)
         else:
             raise TypeError("journey must be a dict or a journey ID string.")
 
@@ -96,7 +96,7 @@ class JourneyManager:
                 return node
         return None
 
-    def get_campaigns(self, optimizer) -> list:
+    def get_campaigns(self, journey_client) -> list:
         """
         Return the campaigns linked to this journey.
 
@@ -104,11 +104,11 @@ class JourneyManager:
         ``campaigns`` list from the enriched response.
 
         Arguments:
-            optimizer : REQUIRED : A ``JourneyOptimizer`` instance.
+            journey_client : REQUIRED : A ``Journey`` instance.
         """
         if self.id is None:
             raise ValueError("Journey ID is not available; cannot fetch campaigns.")
-        enriched = optimizer.get_journey(self.id, include="campaigns")
+        enriched = journey_client.getJourney(self.id, include="campaigns")
         return enriched.get("campaigns", [])
 
     def to_dict(self) -> dict:

@@ -32,9 +32,6 @@ dependencies = [
     "matplotlib"
 ]
 
-[project.optional-dependencies]
-ajo = []
-
 [project.urls]
 "Homepage" = "https://github.com/adobe/aepp"
 

@@ -37,24 +37,24 @@ class JourneyManagerTest(unittest.TestCase):
         self.assertEqual(jm.sandbox_name, "prod")
 
     def test_init_with_id_requires_optimizer(self):
-        """JourneyManager raises ValueError when given an ID without an optimizer."""
+        """JourneyManager raises ValueError when given an ID without a journey_client."""
         with self.assertRaises(ValueError):
             JourneyManager("j-001")
 
     def test_init_with_id_fetches_journey(self):
-        """JourneyManager calls optimizer.get_journey when given an ID string."""
-        mock_optimizer = MagicMock()
-        mock_optimizer.get_journey.return_value = _JOURNEY
-        jm = JourneyManager("j-001", optimizer=mock_optimizer)
-        mock_optimizer.get_journey.assert_called_once_with("j-001", include=None)
+        """JourneyManager calls journey_client.getJourney when given an ID string."""
+        mock_client = MagicMock()
+        mock_client.getJourney.return_value = _JOURNEY
+        jm = JourneyManager("j-001", journey_client=mock_client)
+        mock_client.getJourney.assert_called_once_with("j-001", include=None)
         self.assertEqual(jm.name, "My Journey")
 
     def test_init_with_id_passes_include(self):
-        """JourneyManager forwards the include parameter to get_journey."""
-        mock_optimizer = MagicMock()
-        mock_optimizer.get_journey.return_value = _JOURNEY
-        JourneyManager("j-001", optimizer=mock_optimizer, include="campaigns")
-        mock_optimizer.get_journey.assert_called_once_with("j-001", include="campaigns")
+        """JourneyManager forwards the include parameter to getJourney."""
+        mock_client = MagicMock()
+        mock_client.getJourney.return_value = _JOURNEY
+        JourneyManager("j-001", journey_client=mock_client, include="campaigns")
+        mock_client.getJourney.assert_called_once_with("j-001", include="campaigns")
 
     def test_init_bad_type_raises(self):
         """JourneyManager raises TypeError for unexpected journey argument type."""
@@ -84,20 +84,20 @@ class JourneyManagerTest(unittest.TestCase):
         self.assertIsNone(jm.get_node("nonexistent"))
 
     def test_get_campaigns(self):
-        """get_campaigns calls get_journey with include=campaigns and returns the list."""
-        mock_optimizer = MagicMock()
-        mock_optimizer.get_journey.return_value = {"id": "j-001", "campaigns": [{"id": "c-1"}]}
+        """get_campaigns calls getJourney with include=campaigns and returns the list."""
+        mock_client = MagicMock()
+        mock_client.getJourney.return_value = {"id": "j-001", "campaigns": [{"id": "c-1"}]}
         jm = JourneyManager(_JOURNEY)
-        result = jm.get_campaigns(mock_optimizer)
-        mock_optimizer.get_journey.assert_called_once_with("j-001", include="campaigns")
+        result = jm.get_campaigns(mock_client)
+        mock_client.getJourney.assert_called_once_with("j-001", include="campaigns")
         self.assertEqual(result, [{"id": "c-1"}])
 
     def test_get_campaigns_no_id_raises(self):
         """get_campaigns raises ValueError when journey has no id."""
-        mock_optimizer = MagicMock()
+        mock_client = MagicMock()
         jm = JourneyManager({"name": "no-id"})
         with self.assertRaises(ValueError):
-            jm.get_campaigns(mock_optimizer)
+            jm.get_campaigns(mock_client)
 
     def test_to_dict_is_copy(self):
         """to_dict returns a deep copy (mutating it does not affect the manager)."""

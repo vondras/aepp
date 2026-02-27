@@ -168,7 +168,6 @@ def configure(
     environment: str = "prod",
     scopes: str = None,
     auth_code:str=None,
-    ajo_base_url: str = None,
     **kwargs
 ):
     """Performs programmatic configuration of the API using provided values.
@@ -182,7 +181,6 @@ def configure(
         environment : OPTIONAL : If not provided, default to prod
         scopes : OPTIONAL : The scope define in your project for your API connection. Oauth V2, for clients and customers.
         auth_code : OPTIONAL : If an authorization code is used directly instead of generating via OauthV2. Oauth V1 only, for adobe internal services.
-        ajo_base_url : OPTIONAL : Override the base URL used for AJO API calls. Defaults to the same global endpoint as AEP (e.g. https://platform.adobe.io).
     """
     if not org_id:
         raise ValueError("`org_id` must be specified in the configuration.")
@@ -219,7 +217,6 @@ def configure(
     endpoints["streaming"]["inlet"] = f"{endpoints['global']}/data/core/edge"
     config_object["oauthTokenEndpointV1"] = f"{config_object['imsEndpoint']}/ims/token/v1"
     config_object["oauthTokenEndpointV2"] = f"{config_object['imsEndpoint']}/ims/token/v3"
-    config_object["ajo_base_url"] = ajo_base_url
     # ensure the reset of the state by overwriting possible values from previous import.
     now_plus_1h = int(time.time()) + 60 * 60
     config_object["token"] = kwargs.get('accesstoken','')
@@ -238,8 +235,7 @@ def configure(
             accesstoken=kwargs.get('accesstoken',''),
             date_limit=config_object["date_limit"],
             environment=environment,
-            endpoint=kwargs.get('endpoint',''),
-            ajo_base_url=ajo_base_url,
+            endpoint = kwargs.get('endpoint','')
         )
         return myInstance
 
@@ -319,7 +315,6 @@ class ConnectObject:
         self.scopes = scopes
         self.token = accesstoken
         self.date_limit = date_limit
-        self.ajo_base_url = kwargs.get("ajo_base_url", None)
         self.__configObject__ = {
             "org_id": self.org_id,
             "client_id": self.client_id,
@@ -332,8 +327,7 @@ class ConnectObject:
             "oauthTokenEndpointV1" : self.oauthEndpointV1,
             "oauthTokenEndpointV2" : self.oauthEndpointV2,
             "scopes": self.scopes,
-            "environment":environment,
-            "ajo_base_url": self.ajo_base_url,
+            "environment":environment
         }
 
     def __str__(self):
