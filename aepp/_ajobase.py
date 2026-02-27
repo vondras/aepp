@@ -127,23 +127,37 @@ def create_ajo_client(
     Factory function that returns an AJO API client for the requested service.
 
     Arguments:
-        service : REQUIRED : One of "journey", "content", or "orchestration".
+        service : REQUIRED : One of "journey", "content", "orchestration", "campaigns",
+            "loyalty", "messaging", "suppression", "simulations", or "orchestrateddataset".
         config : OPTIONAL : config object in the config module. (DO NOT MODIFY)
         header : OPTIONAL : header object in the config module. (DO NOT MODIFY)
         loggingObject : OPTIONAL : logging object to log messages.
 
     Returns:
-        An instance of Journey, Content, or Orchestration.
+        An instance of Journey, Content, Orchestration, Campaigns, Loyalty,
+        Messaging, Suppression, Simulations, or OrchestratedDataset.
     """
     ## Local imports avoid circular-import issues at module load time
     from aepp.journey import Journey
     from aepp.content import Content
     from aepp.orchestration import Orchestration
+    from aepp.campaigns import Campaigns
+    from aepp.loyalty import Loyalty
+    from aepp.messaging import Messaging
+    from aepp.suppression import Suppression
+    from aepp.simulations import Simulations
+    from aepp.orchestrateddataset import OrchestratedDataset
 
     _services: dict = {
         "journey": Journey,
         "content": Content,
         "orchestration": Orchestration,
+        "campaigns": Campaigns,
+        "loyalty": Loyalty,
+        "messaging": Messaging,
+        "suppression": Suppression,
+        "simulations": Simulations,
+        "orchestrateddataset": OrchestratedDataset,
     }
     if not isinstance(service, str):
         raise ValueError(

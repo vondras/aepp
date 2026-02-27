@@ -17,17 +17,17 @@ and the corresponding `aepp` Python wrapper modules.
 
 | Spec file | Title | Tags | Ops | Base path | aepp status | Issue |
 |-----------|-------|------|-----|-----------|-------------|-------|
-| [`campaigns-retrieve.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/campaigns-retrieve.yaml) | Retrieve & filter Action Campaigns | Metadata Resource, Workflow Resource, Campaign Resource | 10 | `/journey/campaigns` | ⬜ outstanding | — |
-| [`campaigns-retrieve-old.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/campaigns-retrieve-old.yaml) | Retrieve & filter Action Campaigns *(legacy)* | Metadata Resource, Workflow Resource, Campaign Resource, + 13 more | 114 | `/journey/campaigns` | ⬜ outstanding | — |
+| [`campaigns-retrieve.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/campaigns-retrieve.yaml) | Retrieve & filter Action Campaigns | Metadata Resource, Workflow Resource, Campaign Resource | 10 | `/journey/campaigns` | ✅ implemented (`aepp.campaigns.Campaigns`) | — |
+| [`campaigns-retrieve-old.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/campaigns-retrieve-old.yaml) | Retrieve & filter Action Campaigns *(legacy)* | Metadata Resource, Workflow Resource, Campaign Resource, + 13 more | 114 | `/journey/campaigns` | ⬜ outstanding (superseded by `campaigns-retrieve.yaml`) | — |
 | [`content.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/content.yaml) | Content templates & fragments API | Content template API, Content fragment API | 14 | `/ajo/content` | ✅ implemented (`aepp.content.Content`) | — |
 | [`journey-retrieve.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/journey-retrieve.yaml) | Retrieve Journeys using APIs | Journeys | 2 | `/ajo/journey` | ✅ implemented (`aepp.journey.Journey`) | — |
 | [`journeys-throttling.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/journeys-throttling.yaml) | Journeys throttling configurations APIs | Capping configuration, Throttling configuration | 16 | `/journey/orchestration` | ✅ implemented (`aepp.orchestration.Orchestration`) | — |
-| [`loyalty-challenges.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/loyalty-challenges.yaml) | AJO Customer Loyalty Challenge State API | Challenge-State | 10 | `/ajo/loyalty` | ⬜ outstanding | — |
-| [`messaging.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/messaging.yaml) | Trigger campaigns using APIs | execution | 7 | `/ajo/im/executions` | ⬜ outstanding | — |
-| [`messagingold.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/messagingold.yaml) | Trigger campaigns using APIs *(legacy)* | execution | 1 | `/imp/message` | ⬜ outstanding | — |
-| [`orchestrated-campaign-dataset.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/orchestrated-campaign-dataset.yaml) | Orchestrated campaigns extension for datasets | DatasetEnablement | 3 | `/ajo/relational` | ⬜ outstanding | — |
-| [`simulations.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/simulations.yaml) | Simulation API | Campaign Proof API, Campaign Preview API | 3 | `/ajo/simulations` | ⬜ outstanding | — |
-| [`suppression.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/suppression.yaml) | Suppression API | Suppression | 13 | `/ajo/config/suppression` | ⬜ outstanding | — |
+| [`loyalty-challenges.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/loyalty-challenges.yaml) | AJO Customer Loyalty Challenge State API | Challenge-State | 10 | `/ajo/loyalty` | ✅ implemented (`aepp.loyalty.Loyalty`) | — |
+| [`messaging.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/messaging.yaml) | Trigger campaigns using APIs | execution | 7 | `/ajo/im/executions` | ✅ implemented (`aepp.messaging.Messaging`) | — |
+| [`messagingold.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/messagingold.yaml) | Trigger campaigns using APIs *(legacy)* | execution | 1 | `/imp/message` | ⬜ outstanding (superseded by `messaging.yaml`) | — |
+| [`orchestrated-campaign-dataset.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/orchestrated-campaign-dataset.yaml) | Orchestrated campaigns extension for datasets | DatasetEnablement | 3 | `/ajo/relational` | ✅ implemented (`aepp.orchestrateddataset.OrchestratedDataset`) | — |
+| [`simulations.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/simulations.yaml) | Simulation API | Campaign Proof API, Campaign Preview API | 3 | `/ajo/simulations` | ✅ implemented (`aepp.simulations.Simulations`) | — |
+| [`suppression.yaml`](https://github.com/vondras/journey-optimizer-apis/blob/main/static/suppression.yaml) | Suppression API | Suppression | 13 | `/ajo/config/suppression` | ✅ implemented (`aepp.suppression.Suppression`) | — |
 
 ---
 
@@ -41,6 +41,18 @@ and the corresponding `aepp` Python wrapper modules.
 - **Operations:** 10
 - **Prod server:** `https://platform.adobe.io/journey/campaigns`
 - **Key paths:** `GET /service/campaigns`, `GET /service/campaigns/{id}`, `GET /service/campaigns/{id}/messages/...`
+- **aepp module:** `aepp.campaigns.Campaigns`
+- **Implemented methods:**
+  - `getCampaigns(count, page, orderby, property, full, actions)` — `GET /service/campaigns`
+  - `getCampaign(campaignId)` — `GET /service/campaigns/{campaignId}`
+  - `getCampaignVersions(campaignId, count, page, orderby, property, full, actions)` — `GET /service/campaigns/{campaignId}/versions`
+  - `getCampaignMessage(campaignId, messageId)` — `GET /service/campaigns/{campaignId}/messages/{messageId}`
+  - `getCampaignMessageVariant(campaignId, messageId, channel, variantId)` — `GET /service/campaigns/{campaignId}/messages/{messageId}/{channel}/variants/{variantId}`
+  - `getCampaignPublishingNotifications(campaignId, count, page, orderby, property)` — `GET /service/campaigns/{campaignId}/publish/validation`
+  - `getCampaignPackage(campaignId, packageId)` — `GET /service/campaigns/{campaignId}/packages/{packageId}`
+  - `getWorkflow(workflowId)` — `GET /service/workflows/{workflowId}`
+  - `getSurfaces(count, page, orderby, channel, property, type)` — `GET /service/metadata/surfaces`
+  - `getSurface(channel, surfaceId, type)` — `GET /service/metadata/surfaces/{channel}/{surfaceId}`
 
 ### `campaigns-retrieve-old.yaml`
 - **Title:** Retrieve & filter Action Campaigns *(legacy — superseded by `campaigns-retrieve.yaml`)*
@@ -122,7 +134,19 @@ and the corresponding `aepp` Python wrapper modules.
 - **Tags:** Challenge-State
 - **Operations:** 10
 - **Prod server:** `https://platform-va7.adobe.io/ajo`
-- **Key paths:** `POST /loyalty/challenges/signup/{challengeId}`, `POST /loyalty/challenges/{profileId}/withdraw/{challengeId}`, `GET /loyalty/challenges/{profileId}`
+- **Key paths:** `POST /loyalty/challenges/signup/{challengeId}`, `POST /loyalty/challenges/{profileId}/withdraw/{challengeId}`, `POST /loyalty/challenges/events`, `GET /loyalty/challenges/{profileId}`, `GET /loyalty/challenges/state`, `GET /loyalty/challenges/org`, `GET /loyalty/challenges/od`, `GET /loyalty/challenges/health`, `GET /actuator/liveness`, `GET /actuator/health`
+- **aepp module:** `aepp.loyalty.Loyalty`
+- **Implemented methods:**
+  - `signupChallenge(challengeId, data)` — `POST /loyalty/challenges/signup/{challengeId}`
+  - `withdrawChallenge(profileId, challengeId)` — `POST /loyalty/challenges/{profileId}/withdraw/{challengeId}`
+  - `sendChallengeEvent(data)` — `POST /loyalty/challenges/events`
+  - `getProfileChallenges(profileId, state)` — `GET /loyalty/challenges/{profileId}`
+  - `getChallengeState(pid, cid, v)` — `GET /loyalty/challenges/state`
+  - `getOrgChallenges()` — `GET /loyalty/challenges/org`
+  - `getProfileChallengesOD(id, idNS, v)` — `GET /loyalty/challenges/od`
+  - `getChallengeHealth()` — `GET /loyalty/challenges/health`
+  - `getLiveness()` — `GET /actuator/liveness`
+  - `getHealthCheck()` — `GET /actuator/health`
 
 ### `messaging.yaml`
 - **Title:** Trigger campaigns using APIs
@@ -131,7 +155,16 @@ and the corresponding `aepp` Python wrapper modules.
 - **Tags:** execution
 - **Operations:** 7
 - **Prod server:** `https://platform.adobe.io/ajo`
-- **Key paths:** `POST /im/executions/unitary`, `POST /im/executions/audience`, `GET /im/executions/audience/{executionId}`
+- **Key paths:** `POST /im/executions/unitary`, `POST /im/executions/audience`, `GET /im/executions/audience/{executionId}`, `GET /im/executions/schedules/{scheduleId}`, `DELETE /im/executions/schedules/{scheduleId}`, `POST /im/executions/highthroughput`, `GET /im/health`
+- **aepp module:** `aepp.messaging.Messaging`
+- **Implemented methods:**
+  - `triggerUnitaryExecution(data)` — `POST /im/executions/unitary`
+  - `triggerAudienceExecution(data)` — `POST /im/executions/audience`
+  - `getAudienceExecutionStatus(executionId)` — `GET /im/executions/audience/{executionId}`
+  - `getScheduledExecutionStatus(scheduleId)` — `GET /im/executions/schedules/{scheduleId}`
+  - `deleteScheduledExecution(scheduleId)` — `DELETE /im/executions/schedules/{scheduleId}`
+  - `triggerHighThroughputExecution(data)` — `POST /im/executions/highthroughput`
+  - `getHealth()` — `GET /im/health`
 
 ### `messagingold.yaml`
 - **Title:** Trigger campaigns using APIs *(legacy — superseded by `messaging.yaml`)*
@@ -147,7 +180,12 @@ and the corresponding `aepp` Python wrapper modules.
 - **Tags:** DatasetEnablement
 - **Operations:** 3
 - **Prod server:** `https://platform.adobe.io/ajo/relational`
-- **Key paths:** `GET /modeler/datasets/{datasetId}/extensions/validation`, `POST /modeler/datasets/extensions/enablement`, `GET /modeler/datasets/extensions/jobs/{jobId}`
+- **Key paths:** `GET /modeler/datasets/{datasetId}/extensions/validation`, `POST /modeler/datasets/extensions/enablement`, `GET /modeler/datasets/extensions/enablement/jobs/{jobId}`
+- **aepp module:** `aepp.orchestrateddataset.OrchestratedDataset`
+- **Implemented methods:**
+  - `validateDatasetExtension(datasetId)` — `GET /modeler/datasets/{datasetId}/extensions/validation`
+  - `enableDatasetExtension(data)` — `POST /modeler/datasets/extensions/enablement`
+  - `getDatasetExtensionJob(jobId)` — `GET /modeler/datasets/extensions/enablement/jobs/{jobId}`
 
 ### `simulations.yaml`
 - **Title:** Simulation API
@@ -157,6 +195,11 @@ and the corresponding `aepp` Python wrapper modules.
 - **Operations:** 3
 - **Prod server:** `https://platform.adobe.io/ajo/simulations`
 - **Key paths:** `POST /campaigns/{campaignId}/proofs`, `GET /campaigns/{campaignId}/proofs/{proofJobId}`, `POST /campaigns/{campaignId}/previews`
+- **aepp module:** `aepp.simulations.Simulations`
+- **Implemented methods:**
+  - `triggerCampaignProof(campaignId, data)` — `POST /campaigns/{campaignId}/proofs`
+  - `getCampaignProofStatus(campaignId, proofJobId)` — `GET /campaigns/{campaignId}/proofs/{proofJobId}`
+  - `createCampaignPreview(campaignId, data)` — `POST /campaigns/{campaignId}/previews`
 
 ### `suppression.yaml`
 - **Title:** Suppression API
@@ -165,4 +208,19 @@ and the corresponding `aepp` Python wrapper modules.
 - **Tags:** Suppression
 - **Operations:** 13
 - **Prod server:** `https://platform.adobe.io/ajo`
-- **Key paths:** `GET, POST /config/suppression/addresses`, `GET, DELETE /config/suppression/addresses/{email}`, `GET, POST /config/suppression/domains`, `GET, DELETE /config/suppression/domains/{domain}`, `GET, POST /upload/jobs`, `GET /upload/jobs/{jobId}`
+- **Key paths:** `GET, POST /config/suppression/addresses`, `GET, DELETE /config/suppression/addresses/{email}`, `GET, POST /config/suppression/domains`, `GET, DELETE /config/suppression/domains/{domain}`, `GET, POST /config/suppression/uploads`, `GET, DELETE /config/suppression/uploads/{jobId}`, `DELETE /config/suppression/admin/{imsOrgId}/{sandboxId}`
+- **aepp module:** `aepp.suppression.Suppression`
+- **Implemented methods:**
+  - `listAddresses(type, orderby, limit, start, property)` — `GET /config/suppression/addresses`
+  - `addAddresses(data, type)` — `POST /config/suppression/addresses`
+  - `getAddress(email, type)` — `GET /config/suppression/addresses/{email}`
+  - `deleteAddress(email, type)` — `DELETE /config/suppression/addresses/{email}`
+  - `listDomains(type, orderby, limit, start, property)` — `GET /config/suppression/domains`
+  - `addDomains(data, type)` — `POST /config/suppression/domains`
+  - `getDomain(domain, type)` — `GET /config/suppression/domains/{domain}`
+  - `deleteDomain(domain, type)` — `DELETE /config/suppression/domains/{domain}`
+  - `uploadSuppression(file_path)` — `POST /config/suppression/uploads`
+  - `listUploadJobs(orderby, limit, start, property)` — `GET /config/suppression/uploads`
+  - `getUploadJob(jobId)` — `GET /config/suppression/uploads/{jobId}`
+  - `deleteUploadJob(jobId)` — `DELETE /config/suppression/uploads/{jobId}`
+  - `deleteAllSuppressions(imsOrgId, sandboxId)` — `DELETE /config/suppression/admin/{imsOrgId}/{sandboxId}`

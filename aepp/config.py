@@ -67,5 +67,8 @@ endpoints = {
     "audit": "/data/foundation",
     "ajo": "/ajo",
     "ajo_content": "/ajo/content",
-    "ajo_orchestration": "/journey/orchestration"
+    "ajo_orchestration": "/journey/orchestration",
+    "ajo_campaigns": "/journey/campaigns",
+    "ajo_simulations": "/ajo/simulations",
+    "ajo_relational": "/ajo/relational"
 }
