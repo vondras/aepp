@@ -65,7 +65,7 @@ and the corresponding `aepp` Python wrapper modules.
 - **Description:** Retrieve Journeys and their associated campaigns.
 - **Tags:** Journeys
 - **Operations:** 2
-- **Prod server:** `https://platform.adobe.io`
+- **Prod server:** `https://platform.adobe.io/ajo/journey`
 - **Key paths:** `GET /ajo/journey`, `GET /ajo/journey/{id}`
 
 ### `journeys-throttling.yaml`
