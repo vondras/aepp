@@ -8,13 +8,11 @@
 #  OF ANY KIND, either express or implied. See the License for the specific language
 #  governing permissions and limitations under the License.
 
-# Internal Library
+## Internal Library
 import aepp
-from aepp import connector
-import logging
+from aepp._ajobase import _AJOBase
 from typing import Union
 from .configs import ConnectObject
-import json
 from copy import deepcopy
 
 # Vendor media types defined by the content.yaml OpenAPI spec
@@ -24,16 +22,12 @@ _FRAGMENT_CONTENT_TYPE = "application/vnd.adobe.ajo.fragment.v1+json"
 _FRAGMENT_LIST_ACCEPT = "application/vnd.adobe.ajo.fragment-list.v1+json"
 
 
-class Content:
+class Content(_AJOBase):
     """
     Class to manage Adobe Journey Optimizer Content Templates and Fragments.
     Implements the content.yaml OpenAPI spec.
     Documentation: https://experienceleague.adobe.com/en/docs/journey-optimizer/using/content-management/content-templates/content-templates
     """
-
-    ## logging capability
-    loggingEnabled = False
-    logger = None
 
     def __init__(
         self,
@@ -49,70 +43,14 @@ class Content:
             header : OPTIONAL : header object in the config module. (DO NOT MODIFY)
             loggingObject : OPTIONAL : logging object to log messages.
         """
-        if loggingObject is not None and sorted(
-            ["level", "stream", "format", "filename", "file"]
-        ) == sorted(list(loggingObject.keys())):
-            self.loggingEnabled = True
-            self.logger = logging.getLogger(f"{__name__}")
-            self.logger.setLevel(loggingObject["level"])
-            if type(loggingObject["format"]) == str:
-                formatter = logging.Formatter(loggingObject["format"])
-            elif type(loggingObject["format"]) == logging.Formatter:
-                formatter = loggingObject["format"]
-            if loggingObject["file"]:
-                fileHandler = logging.FileHandler(loggingObject["filename"])
-                fileHandler.setFormatter(formatter)
-                self.logger.addHandler(fileHandler)
-            if loggingObject["stream"]:
-                streamHandler = logging.StreamHandler()
-                streamHandler.setFormatter(formatter)
-                self.logger.addHandler(streamHandler)
-        if type(config) == dict:
-            pass
-        elif type(config) == ConnectObject:
-            header = config.getConfigHeader()
-            config = config.getConfigObject()
-        self.connector = connector.AdobeRequest(
-            config=config,
-            header=header,
-            loggingEnabled=self.loggingEnabled,
-            loggingObject=self.logger,
+        super().__init__(
+            config=config, header=header, loggingObject=loggingObject, **kwargs
         )
-        self.header = self.connector.header
-        self.header.update(**kwargs)
-        if kwargs.get("sandbox", None) is not None:
-            self.sandbox = kwargs.get("sandbox")
-            self.connector.config["sandbox"] = kwargs.get("sandbox")
-            self.header.update({"x-sandbox-name": kwargs.get("sandbox")})
-            self.connector.header.update({"x-sandbox-name": kwargs.get("sandbox")})
-        else:
-            self.sandbox = self.connector.config["sandbox"]
         self.endpoint = (
             self.connector.config.get("global", aepp.config.endpoints["global"])
             + aepp.config.endpoints["ajo_content"]
         )
 
-    def __str__(self):
-        return json.dumps(
-            {
-                "class": "Content",
-                "sandbox": self.sandbox,
-                "clientId": self.connector.config.get("client_id"),
-                "orgId": self.connector.config.get("org_id"),
-            },
-            indent=2,
-        )
-
-    def __repr__(self):
-        return json.dumps(
-            {
-                "class": "Content",
-                "sandbox": self.sandbox,
-                "clientId": self.connector.config.get("client_id"),
-                "orgId": self.connector.config.get("org_id"),
-            },
-            indent=2,
-        )
 
     # ------------------------------------------------------------------ #
     # Content Templates                                                    #
